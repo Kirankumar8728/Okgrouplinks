@@ -10,25 +10,17 @@ import {
   Sparkles,
   Globe,
   Layers,
-  ArrowLeft,
-  CheckCircle2
+  MessageCircle,
+  Send,
+  Gamepad2,
+  Users
 } from 'lucide-react';
-import { PlatformIcon } from '@/src/components/PlatformIcon';
-
-export const metadata = {
-  title: '404 — Community or Page Not Found | Group Links Directory',
-  description: 'The requested community link or directory page could not be located. Explore thousands of active, verified WhatsApp, Telegram, and Discord communities.',
-  robots: {
-    index: false,
-    follow: true,
-  },
-};
 
 export default function NotFound() {
   const platforms = [
-    { name: 'WhatsApp Groups', href: '/whatsapp-groups', platform: 'whatsapp' as const, badge: '5,000+ active links', color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30' },
-    { name: 'Telegram Channels', href: '/telegram-channels', platform: 'telegram' as const, badge: 'Top verified channels', color: 'from-sky-500/20 to-blue-500/10 border-sky-500/30' },
-    { name: 'Discord Servers', href: '/discord-servers', platform: 'discord' as const, badge: 'Gaming & coding hubs', color: 'from-indigo-500/20 to-purple-500/10 border-indigo-500/30' },
+    { name: 'WhatsApp Groups', href: '/whatsapp-groups', icon: MessageCircle, badge: '5,000+ active links', color: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30' },
+    { name: 'Telegram Channels', href: '/telegram-channels', icon: Send, badge: 'Top verified channels', color: 'from-sky-500/20 to-blue-500/10 border-sky-500/30' },
+    { name: 'Discord Servers', href: '/discord-servers', icon: Gamepad2, badge: 'Gaming & coding hubs', color: 'from-indigo-500/20 to-purple-500/10 border-indigo-500/30' },
     { name: '24H Leaderboard', href: '/active24hours', icon: Flame, badge: 'Most joined today', color: 'from-amber-500/20 to-orange-500/10 border-amber-500/30' },
   ];
 
@@ -195,14 +187,8 @@ export default function NotFound() {
                 className={`p-3.5 rounded-2xl bg-gradient-to-b ${item.color} border hover:border-white/20 transition-all flex flex-col justify-between group cursor-pointer shadow-sm hover:scale-[1.02]`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center shrink-0 border border-white/10">
-                    {item.platform ? (
-                      <PlatformIcon platform={item.platform} className="w-4 h-4" />
-                    ) : item.icon ? (
-                      <item.icon className="w-4 h-4 text-amber-400" />
-                    ) : (
-                      <Compass className="w-4 h-4 text-indigo-400" />
-                    )}
+                  <div className="w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center shrink-0 border border-white/10 text-white">
+                    <item.icon className="w-4 h-4" />
                   </div>
                   <ArrowRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
                 </div>
