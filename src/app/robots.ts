@@ -9,34 +9,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/api/', '/internal', '/login', '/account'],
-      },
-      {
-        userAgent: [
-          'Googlebot',
-          'Bingbot',
-          'Applebot',
-          'GPTBot',
-          'ChatGPT-User',
-          'Google-Extended',
-          'PerplexityBot',
-          'ClaudeBot',
-          'Anthropic-AI',
-          'CCBot',
-          'cohere-ai',
-          'Bytespider',
-        ],
-        allow: '/',
-        disallow: ['/admin', '/api/', '/internal', '/login', '/account'],
+        disallow: ['/api/'],
       },
     ],
-    sitemap: [
-      `${baseUrl}/sitemap.xml`,
-      `${baseUrl}/sitemaps/core/sitemap.xml`,
-      `${baseUrl}/sitemaps/categories/sitemap.xml`,
-      `${baseUrl}/sitemaps/groups/sitemap.xml`,
-      `${baseUrl}/sitemap-index.xml`,
-    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
-

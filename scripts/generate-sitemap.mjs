@@ -196,35 +196,6 @@ async function fetchActiveGroups() {
     }
   }
 
-  // Tier 3: Parse from source seed file if needed
-  if (groups.length === 0) {
-    const seedPath = path.join(ROOT_DIR, 'src', 'data', 'seedGroups.ts');
-    if (fs.existsSync(seedPath)) {
-      try {
-        const content = fs.readFileSync(seedPath, 'utf8');
-        const idMatches = content.matchAll(/id:\s*['"]([^'"]+)['"]/g);
-        const titleMatches = content.matchAll(/title:\s*['"]([^'"]+)['"]/g);
-        const slugMatches = content.matchAll(/slug:\s*['"]([^'"]+)['"]/g);
-        const ids = Array.from(idMatches, m => m[1]);
-        const titles = Array.from(titleMatches, m => m[1]);
-        const slugs = Array.from(slugMatches, m => m[1]);
-
-        for (let i = 0; i < ids.length; i++) {
-          if (ids[i] && !seenIds.has(ids[i])) {
-            seenIds.add(ids[i]);
-            groups.push({
-              id: ids[i],
-              title: titles[i] || 'Community',
-              slug: slugs[i] || ids[i],
-              platform: ids[i].includes('tg') ? 'telegram' : (ids[i].includes('dc') ? 'discord' : 'whatsapp'),
-              createdAt: new Date().toISOString(),
-              isActive: true,
-            });
-          }
-        }
-      } catch {}
-    }
-  }
 
   return groups.filter(g => g.isActive !== false && g.is_active !== false);
 }

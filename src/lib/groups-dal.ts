@@ -7,7 +7,6 @@ import {
   categoryToSlug,
   generateSlug,
   isAdultGroup,
-  getHourlyDeterministicRandom,
   getNumericGroupId,
   getCategoryFallbackImage,
   isGenericGroupTitle,

@@ -41,7 +41,6 @@ import {
   resolveValidGroupImage,
   get24HourCycleExpiration,
   calculate24HourDailyScore,
-  getHourlyDeterministicRandom,
   getGroupUrlPath,
   getGroupJoinPath,
   categoryToSlug,
@@ -295,15 +294,19 @@ export const Active24HoursLeaderboardView: React.FC<Active24HoursLeaderboardView
   const sortedFilteredGroups = [...filteredGroups].sort((a, b) => {
     const scoreA = calculate24HourDailyScore(a);
     const scoreB = calculate24HourDailyScore(b);
-    if (scoreA > 0 || scoreB > 0) {
-      if (scoreA !== scoreB) return scoreB - scoreA;
-      const upvotesA = a.activity24h?.upvotes || 0;
-      const upvotesB = b.activity24h?.upvotes || 0;
-      if (upvotesA !== upvotesB) return upvotesB - upvotesA;
-    }
-    const randA = getHourlyDeterministicRandom(a.id || a.slug || '', '24h_view');
-    const randB = getHourlyDeterministicRandom(b.id || b.slug || '', '24h_view');
-    return randB - randA;
+    if (scoreA !== scoreB) return scoreB - scoreA;
+
+    const upvotesA = a.activity24h?.upvotes || a.upvotes || 0;
+    const upvotesB = b.activity24h?.upvotes || b.upvotes || 0;
+    if (upvotesA !== upvotesB) return upvotesB - upvotesA;
+
+    const clicksA = a.activity24h?.joins || a.clicks || 0;
+    const clicksB = b.activity24h?.joins || b.clicks || 0;
+    if (clicksA !== clicksB) return clicksB - clicksA;
+
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
   });
 
   const champion = sortedFilteredGroups.length > 0 ? sortedFilteredGroups[0] : null;

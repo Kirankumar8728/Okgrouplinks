@@ -30,7 +30,6 @@ import {
   formatMemberCount, 
   calculatePopularityScore,
   calculate7DayScore,
-  getHourlyDeterministicRandom,
   getRankBadgeColor, 
   isAdultGroup, 
   getJoinButtonLabel,
@@ -134,24 +133,27 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
     return calculate7DayScore(g);
   };
 
-  // Sort by real 7-Day user interactions, with hourly deterministic rotation fallback for zero scores
+  // Sort strictly by real 7-Day user interactions, with authentic fallback (upvotes, clicks, newest creation date)
   const rankedGroups = [...platformFilteredGroups]
     .map(g => ({
       ...g,
       sevenDayScore: get7DayScore(g),
-      hourlyRandom: getHourlyDeterministicRandom(g.id || g.slug || '', '7day_leaderboard'),
     }))
     .sort((a, b) => {
-      if (a.sevenDayScore > 0 || b.sevenDayScore > 0) {
-        if (a.sevenDayScore !== b.sevenDayScore) {
-          return b.sevenDayScore - a.sevenDayScore;
-        }
-        const upvotesA = a.upvotes || 0;
-        const upvotesB = b.upvotes || 0;
-        if (upvotesA !== upvotesB) return upvotesB - upvotesA;
-        return b.hourlyRandom - a.hourlyRandom;
+      if (a.sevenDayScore !== b.sevenDayScore) {
+        return b.sevenDayScore - a.sevenDayScore;
       }
-      return b.hourlyRandom - a.hourlyRandom;
+      const upvotesA = a.upvotes || 0;
+      const upvotesB = b.upvotes || 0;
+      if (upvotesA !== upvotesB) return upvotesB - upvotesA;
+
+      const clicksA = a.clicks || 0;
+      const clicksB = b.clicks || 0;
+      if (clicksA !== clicksB) return clicksB - clicksA;
+
+      const timeA = new Date(a.createdAt || 0).getTime();
+      const timeB = new Date(b.createdAt || 0).getTime();
+      return timeB - timeA;
     });
 
   const topThree = rankedGroups.slice(0, 3);

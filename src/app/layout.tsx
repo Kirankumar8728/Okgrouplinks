@@ -2,29 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { getSiteUrl, generateWebSiteJsonLd, generateOrganizationJsonLd } from '@/src/lib/rank';
-import { getCustomScriptsServer } from '@/src/lib/server-scripts-persistence';
 import AppProviders from '@/src/components/AppProviders';
 import { CookieConsentBanner } from '@/src/components/CookieConsentBanner';
-
-function getSanitizedGaId(customId?: string): string | null {
-  const candidate = (
-    process.env.NEXT_PUBLIC_GA_ID ||
-    process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ||
-    process.env.GA_MEASUREMENT_ID ||
-    process.env.GOOGLE_ANALYTICS_ID ||
-    customId ||
-    ''
-  ).trim();
-
-  if (!candidate) return null;
-
-  // Sanitize: allow only valid alphanumeric and hyphens (e.g., G-1234568)
-  if (/^[A-Za-z0-9_-]+$/.test(candidate)) {
-    return candidate;
-  }
-
-  return null;
-}
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -58,16 +37,6 @@ export const metadata: Metadata = {
   creator: 'Group Links',
   publisher: 'Group Links',
   manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'GroupLinks',
-  },
-  icons: {
-    icon: '/assets/aistudio/app__1__c063602f.webp',
-    shortcut: '/assets/aistudio/app__1__c063602f.webp',
-    apple: '/assets/aistudio/app__1__c063602f.webp',
-  },
   robots: {
     index: true,
     follow: true,
@@ -89,10 +58,10 @@ export const metadata: Metadata = {
       'Discover active WhatsApp groups, Telegram channels, Discord servers and online communities by category, language and region.',
     images: [
       {
-        url: `${siteUrl}/og-image.png`,
+        url: `${siteUrl}/assets/aistudio/app__1__c063602f.webp`,
         width: 1200,
         height: 630,
-        alt: 'Group Links Community Discovery',
+        alt: 'Group Links Directory',
       },
     ],
   },
@@ -101,7 +70,7 @@ export const metadata: Metadata = {
     title: 'WhatsApp, Telegram & Discord Groups | Group Links Directory',
     description:
       'Discover active WhatsApp groups, Telegram channels, Discord servers and online communities by category, language and region.',
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/assets/aistudio/app__1__c063602f.webp`],
   },
 };
 
@@ -121,21 +90,14 @@ export default function RootLayout({
 }) {
   const websiteSchema = generateWebSiteJsonLd();
   const orgSchema = generateOrganizationJsonLd();
-  const customScripts = getCustomScriptsServer();
-  const gaId = getSanitizedGaId(customScripts?.googleAnalyticsId);
 
   return (
     <html lang="en" suppressHydrationWarning className={`dark scroll-smooth ${plusJakartaSans.variable}`}>
       <head>
-        <link rel="icon" type="image/webp" href="/assets/aistudio/app__1__c063602f.webp" />
-        <link rel="shortcut icon" href="/assets/aistudio/app__1__c063602f.webp" />
-        <link rel="apple-touch-icon" href="/assets/aistudio/app__1__c063602f.webp" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.discordapp.com" />
-        <link rel="llms-txt" href="/llms.txt" />
       </head>
-      <body suppressHydrationWarning className="min-h-screen bg-slate-950 text-slate-100 antialiased font-sans flex flex-col selection:bg-emerald-500 selection:text-white">
+      <body suppressHydrationWarning className="min-h-screen bg-slate-950 text-slate-100 antialiased font-sans flex flex-col">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}

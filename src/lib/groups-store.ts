@@ -1,5 +1,4 @@
 import { Group, GroupComment, Platform, Category, Language, Region, FilterState } from '@/src/types';
-import { ALL_SEED_GROUPS, INITIAL_GROUPS } from '@/src/data/seedGroups';
 import { classifyGroupCategory } from '@/src/lib/taxonomy';
 import {
   detectPlatformFromUrl,
@@ -8,7 +7,6 @@ import {
   calculatePopularityScore,
   calculate24HourDailyScore,
   calculate7DayScore,
-  getHourlyDeterministicRandom,
   get24HourCycleExpiration,
   inject24HourTopRankedInThirdPlace,
   extractCanonicalGroupIdentifier,
@@ -1437,34 +1435,35 @@ export async function get24HourTrendingGroups(platform?: string, limit: number =
   const scored = filtered.map(g => {
     ensureGroup24hActivity(g);
     const realScore = calculate24HourDailyScore(g);
-    const hourlyRandom = getHourlyDeterministicRandom(g.id || g.slug || '', '24h_leaderboard');
     return {
       group: g,
       realScore,
-      hourlyRandom,
     };
   });
 
   // Sort groups:
   // 1. Real user activity (> 0) strictly takes precedence, sorted by score descending.
-  // 2. If scores are 0 (no user activity), rotate fairly with hourly deterministic random.
+  // 2. Tie-breakers: real upvotes, joins, shares.
+  // 3. Fallback: authentic newest groups first (createdAt descending), never random generation/rotation.
   scored.sort((a, b) => {
-    if (a.realScore > 0 || b.realScore > 0) {
-      if (a.realScore !== b.realScore) {
-        return b.realScore - a.realScore;
-      }
-      // Tie-breaker for non-zero scores: real upvotes, then joins, then shares, then hourly random
-      const upvotesA = a.group.activity24h?.upvotes || 0;
-      const upvotesB = b.group.activity24h?.upvotes || 0;
-      if (upvotesA !== upvotesB) return upvotesB - upvotesA;
-      return b.hourlyRandom - a.hourlyRandom;
+    if (a.realScore !== b.realScore) {
+      return b.realScore - a.realScore;
     }
-    // If both have 0 real score, order by hourly deterministic random rotation
-    return b.hourlyRandom - a.hourlyRandom;
+    const upvotesA = a.group.activity24h?.upvotes || a.group.upvotes || 0;
+    const upvotesB = b.group.activity24h?.upvotes || b.group.upvotes || 0;
+    if (upvotesA !== upvotesB) return upvotesB - upvotesA;
+
+    const clicksA = a.group.activity24h?.joins || a.group.clicks || 0;
+    const clicksB = b.group.activity24h?.joins || b.group.clicks || 0;
+    if (clicksA !== clicksB) return clicksB - clicksA;
+
+    const timeA = new Date(a.group.createdAt || 0).getTime();
+    const timeB = new Date(b.group.createdAt || 0).getTime();
+    return timeB - timeA;
   });
 
   const ranked = scored.slice(0, limit).map((item, idx) => {
-    const isTop = idx === 0;
+    const isTop = idx === 0 && item.realScore > 0;
     return {
       ...item.group,
       dailyRankScore: item.realScore,

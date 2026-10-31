@@ -826,20 +826,6 @@ export function checkDuplicateCommunity(
   return { isDuplicate: false };
 }
 
-/**
- * Deterministic pseudo-random number generator [0, 1) based on item ID and current hourly seed.
- * Ensures groups with zero real interactions rotate fairly and cleanly every single hour
- * without layout shifts during the same hour.
- */
-export function getHourlyDeterministicRandom(id: string = '', salt: string = 'hourly'): number {
-  const currentHourTimestamp = Math.floor(Date.now() / (3600 * 1000));
-  const seedStr = `${id}-${currentHourTimestamp}-${salt}`;
-  let hash = 0;
-  for (let i = 0; i < seedStr.length; i++) {
-    hash = (hash * 31 + seedStr.charCodeAt(i)) | 0;
-  }
-  return (Math.abs(hash) % 100000) / 100000;
-}
 
 /**
  * Calculates real-time 24-Hour Top Ranking Score based purely on REAL user interactions in today's cycle:
@@ -931,19 +917,12 @@ export function inject24HourTopRankedInThirdPlace(groups: Group[]): Group[] {
       }
     });
 
-    // If no group has real 24h score > 0, rotate top group based on hourly deterministic random
-    if (bestIdx === -1) {
-      let bestRandom = -1;
-      listCopy.forEach((g, idx) => {
-        const rnd = getHourlyDeterministicRandom(g.id || g.slug || '', '3rd_place_hourly');
-        if (rnd > bestRandom) {
-          bestRandom = rnd;
-          bestIdx = idx;
-        }
-      });
+    // If no group has real user activity score > 0, do not fabricate or inject any random group
+    if (bestIdx === -1 || bestScore <= 0) {
+      return groups;
     }
 
-    topRankedIndex = bestIdx !== -1 ? bestIdx : 0;
+    topRankedIndex = bestIdx;
   }
 
   if (topRankedIndex === -1 || topRankedIndex >= listCopy.length) return listCopy;
