@@ -223,10 +223,6 @@ const nextConfig = {
             value: 'nosniff',
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
@@ -244,7 +240,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https:",
               "connect-src 'self' https://*.supabase.co https://*.googleapis.com https://accounts.google.com https://*.google-analytics.com https://*.googletagmanager.com",
               "frame-src 'self' https://accounts.google.com",
-              "frame-ancestors 'self' https://*.run.app https://*.google.com https://ai.studio",
+              "frame-ancestors *",
             ].join('; '),
           },
         ],

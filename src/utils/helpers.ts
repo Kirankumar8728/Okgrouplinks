@@ -1009,11 +1009,9 @@ export function isAdultGroup(group: {
   url?: string;
   rulesSummary?: string;
 }): boolean {
-  if (group.isNsfw || group.category === 'Adult / 18+') return true;
-  
-  // Intelligent customized keyword auto-filtering check
-  const analysis = analyzeGroupContent(group);
-  return analysis.isAdult;
+  if (!group) return false;
+  // A group is strictly adult only if explicitly flagged as NSFW or assigned to the Adult / 18+ category
+  return Boolean(group.isNsfw || group.category === 'Adult / 18+');
 }
 
 export function getRankBadgeColor(rank: number): { bg: string; text: string; border: string } {

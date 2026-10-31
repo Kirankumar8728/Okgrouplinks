@@ -439,8 +439,8 @@ export async function getGroups(options: GetGroupsOptions = {}): Promise<Paginat
   if (mysqlResult && mysqlResult.groups.length > 0) {
     await checkDmcaTimeout(mysqlResult.groups);
     
-    // Strict isolation
-    mysqlResult.groups = onAdultSubdomain 
+    const isAdultMode = Boolean(onAdultSubdomain || safeOptions.showAdultOnly || safeOptions.category === 'Adult / 18+');
+    mysqlResult.groups = isAdultMode 
       ? mysqlResult.groups.filter(g => isAdultGroup(g))
       : mysqlResult.groups.filter(g => !isAdultGroup(g));
     mysqlResult.total = mysqlResult.groups.length;
@@ -453,7 +453,8 @@ export async function getGroups(options: GetGroupsOptions = {}): Promise<Paginat
     await checkDmcaTimeout(storeResult.groups);
     
     // Strict isolation
-    storeResult.groups = onAdultSubdomain
+    const isAdultMode = Boolean(onAdultSubdomain || safeOptions.showAdultOnly || safeOptions.category === 'Adult / 18+');
+    storeResult.groups = isAdultMode
       ? storeResult.groups.filter(g => isAdultGroup(g))
       : storeResult.groups.filter(g => !isAdultGroup(g));
     storeResult.total = storeResult.groups.length;

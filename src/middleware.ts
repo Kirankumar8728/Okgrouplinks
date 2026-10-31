@@ -37,13 +37,26 @@ export function middleware(req: NextRequest) {
     hostHeader.includes('adult.grouplinks.app') ||
     req.nextUrl.searchParams.get('subdomain') === 'adult';
 
+  const requestHeaders = new Headers(req.headers);
+  if (isAdultSubdomain) {
+    requestHeaders.set('x-adult-subdomain', 'true');
+  }
+
   // 1. Subdomain Isolation Logic
   if (isAdultSubdomain) {
     // Root `/` on adult.grouplinks.app serves adult group listings directly
     if (pathname === '/') {
       const url = req.nextUrl.clone();
       url.pathname = '/adult-groups';
-      return NextResponse.rewrite(url);
+      const rewriteRes = NextResponse.rewrite(url, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+      rewriteRes.headers.set('X-Content-Type-Options', 'nosniff');
+      rewriteRes.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+      rewriteRes.headers.set('X-Adult-Subdomain', 'true');
+      return rewriteRes;
     }
   } else {
     // Main domain (grouplinks.app): redirect direct adult visits to adult.grouplinks.app
@@ -99,10 +112,13 @@ export function middleware(req: NextRequest) {
   }
 
   // 3. Set strict security response headers and subdomain signal
-  const res = NextResponse.next();
+  const res = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 
   res.headers.set('X-Content-Type-Options', 'nosniff');
-  res.headers.set('X-Frame-Options', 'SAMEORIGIN');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   if (isAdultSubdomain) {

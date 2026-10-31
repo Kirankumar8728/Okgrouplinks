@@ -43,8 +43,10 @@ export const AdultGroupsView: React.FC<AdultGroupsViewProps> = ({
           initialGroups={initialGroups}
           initialTotalCount={initialTotalCount}
           initialCategory="Adult / 18+"
+          lockCategory="Adult / 18+"
           initialStats={initialStats}
           breadcrumbs={breadcrumbs}
+          hideAdultContent={false}
         />
       )}
       {!hasConsent && (

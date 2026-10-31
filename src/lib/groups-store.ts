@@ -265,18 +265,10 @@ export const syncWithLocalDatabase = syncDatabase;
 function syncDatabaseFromSeeds(): void {
   const fromDisk = loadGroupsFromDisk();
 
-  if (fromDisk && Array.isArray(fromDisk) && fromDisk.length > 0) {
+  if (fromDisk && Array.isArray(fromDisk)) {
     globalForGroups.nexusGroupsDatabase = fromDisk;
   } else {
-    // Only use initial baseline seeds on a completely fresh/empty installation
-    const seedList = ALL_SEED_GROUPS && ALL_SEED_GROUPS.length > 0 ? ALL_SEED_GROUPS : INITIAL_GROUPS;
-    const sanitizedSeedList = seedList.map((g, i) => sanitizeGroupWithDefaults(g, i));
-    globalForGroups.nexusGroupsDatabase = [...sanitizedSeedList].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    try {
-      saveGroupsToDisk(globalForGroups.nexusGroupsDatabase);
-    } catch {}
+    globalForGroups.nexusGroupsDatabase = [];
   }
   rebuildGroupsLookupIndex(globalForGroups.nexusGroupsDatabase);
 }
@@ -720,10 +712,11 @@ export async function queryGroups(options: GetGroupsOptions = {}) {
 
   let effectiveCategory: string | undefined = category;
 
-  // Strict subdomain isolation
+  // Strict subdomain and adult filtering isolation
   const isAdultSub = await (await import('@/src/lib/subdomain')).isAdultSubdomainRequest();
+  const shouldFilterAdultOnly = isAdultSub || showAdultOnly || effectiveCategory === 'Adult / 18+';
   
-  if (isAdultSub) {
+  if (shouldFilterAdultOnly) {
     filtered = filtered.filter(g => isAdultGroup(g));
   } else {
     filtered = filtered.filter(g => !isAdultGroup(g));
@@ -1030,7 +1023,7 @@ export async function createNewGroup(data: Partial<Group>): Promise<Group> {
     rulesSummary: data.rulesSummary || '',
   });
 
-  const isAdult = Boolean(data.isNsfw || data.category === 'Adult / 18+' || autoAnalysis.isAdult);
+  const isAdult = Boolean(data.isNsfw || data.category === 'Adult / 18+');
   // Run automated taxonomy classification to prevent default "Tech & Programming" bug across diverse topics
   const classifiedCategory = classifyGroupCategory(
     title,
